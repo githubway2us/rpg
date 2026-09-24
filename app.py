@@ -50,7 +50,7 @@ MONSTER_MISS  = 0.08
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("LUMIVARA_SECRET", "lumivara_secret_2026")
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("lumivara")

@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#050608">
 <title>Lumivara Online</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,11 +23,13 @@
         --neon-border: rgba(0,255,204,.45);
     }
 
+    html, body { height: 100%; overscroll-behavior: none; }
     body {
         margin: 0; background: #050608; color: var(--text);
         font-family: 'Kanit', 'Segoe UI', sans-serif;
         display: flex; justify-content: center; align-items: center;
         height: 100vh; overflow: hidden; user-select: none;
+        touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     }
     body::before {
         content: ''; position: fixed; inset: -40%;
@@ -72,7 +74,7 @@
         mask-image: radial-gradient(circle at 50% 50%, #000 25%, transparent 72%);
     }
     .auth-box {
-        position: relative; width: 410px;
+        position: relative; width: 410px; max-width: calc(100vw - 28px);
         background: linear-gradient(160deg, rgba(20,24,38,.97), rgba(12,14,22,.97));
         border: 1px solid var(--neon-border);
         border-radius: 16px; padding: 34px 30px 26px; text-align: center;
@@ -143,11 +145,12 @@
 
     /* ================= GAME WRAPPER ================= */
     #game-wrapper {
-        position: relative; width: 800px; height: 600px;
+        position: relative; width: 800px; height: 600px; flex: 0 0 auto;
         background: #0b0d14; border-radius: 14px;
         border: 1px solid var(--neon-border);
         box-shadow: 0 0 0 4px rgba(0,255,204,.05), 0 0 45px rgba(0,255,204,.13), 0 30px 60px rgba(0,0,0,.7);
         display: none; overflow: hidden;
+        transform-origin: center center;
         animation: fadeUp .5s ease;
     }
     #game-wrapper::after {
@@ -155,7 +158,7 @@
         background: repeating-linear-gradient(0deg, rgba(255,255,255,.015) 0 1px, transparent 1px 3px);
         border-radius: 13px;
     }
-    canvas { display: block; border-radius: 13px; }
+    canvas { display: block; border-radius: 13px; touch-action: none; cursor: crosshair; }
 
     /* ================= HUD ================= */
     #hud-top-left {
@@ -235,6 +238,7 @@
         color: var(--neon); border: 1px solid var(--neon-border);
         padding: 7px 11px; font-weight: 600; cursor: pointer; border-radius: 9px;
         font-size: 11px; font-family: 'Kanit', sans-serif; transition: .2s; backdrop-filter: blur(4px);
+        touch-action: manipulation;
     }
     .menu-btn:hover {
         background: linear-gradient(135deg, #00ffcc, #00b894); color: #04211a;
@@ -256,9 +260,10 @@
         border-radius: 12px; cursor: pointer; transition: .15s;
         box-shadow: 0 4px 12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08);
         backdrop-filter: blur(4px);
+        touch-action: none; -webkit-user-select: none; user-select: none;
     }
     .dpad-btn:hover { background: rgba(0,255,204,.16); }
-    .dpad-btn:active { background: var(--neon); color: #04211a; transform: scale(.9); box-shadow: 0 0 18px rgba(0,255,204,.6); }
+    .dpad-btn.held, .dpad-btn:active { background: var(--neon); color: #04211a; transform: scale(.9); box-shadow: 0 0 18px rgba(0,255,204,.6); }
     .dpad-center {
         background: radial-gradient(circle at 50% 40%, rgba(0,255,204,.14), rgba(10,12,20,.9));
         border: 1px solid rgba(0,255,204,.22); border-radius: 12px;
@@ -273,6 +278,7 @@
         background: var(--panel-bg); border: 1px solid rgba(255,255,255,.16);
         border-radius: 14px; display: flex; align-items: center; justify-content: center;
         font-size: 22px; transition: .2s; box-shadow: 0 6px 16px rgba(0,0,0,.5); backdrop-filter: blur(4px);
+        touch-action: none;
     }
     .quick-slot:hover { border-color: var(--neon-border); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.5), 0 0 12px rgba(0,255,204,.15); }
     .quick-slot:active { transform: scale(.92); }
@@ -292,7 +298,7 @@
         font-family: 'Kanit', sans-serif; border-radius: 50%;
         display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
         text-shadow: 0 1px 3px rgba(0,0,0,.5); transition: .15s;
-        animation: atkPulse 2.2s infinite;
+        animation: atkPulse 2.2s infinite; touch-action: none;
     }
     #attack-action-btn .atk-icon { font-size: 22px; line-height: 1; }
     #attack-action-btn .atk-label { font-size: 11px; font-weight: 700; letter-spacing: .5px; }
@@ -326,6 +332,7 @@
         background: var(--panel-bg); border: 1px solid var(--neon-border); color: var(--neon);
         padding: 7px 14px; font-size: 11px; font-weight: 600; border-radius: 20px;
         cursor: pointer; font-family: 'Kanit', sans-serif; transition: .2s; backdrop-filter: blur(6px);
+        touch-action: manipulation;
     }
     #chat-toggle-floating:hover { background: rgba(0,255,204,.14); box-shadow: 0 0 14px rgba(0,255,204,.3); }
     #chat-container {
@@ -344,6 +351,7 @@
         padding: 5px 9px; border-radius: 8px; cursor: move; margin-bottom: 5px;
         border: 1px solid rgba(0,255,204,.2);
         display: flex; justify-content: space-between; align-items: center;
+        touch-action: none;
     }
     .chat-close { cursor: pointer; padding: 0 4px; transition: .2s; color: var(--text-dim); }
     .chat-close:hover { color: #ff6b81; }
@@ -395,7 +403,7 @@
     .modal {
         display: none; position: absolute; top: 50%; left: 50%;
         transform: translate(-50%, -50%);
-        width: 420px; max-height: 480px; overflow-y: auto;
+        width: 420px; max-width: calc(100% - 24px); max-height: 480px; overflow-y: auto;
         background: linear-gradient(165deg, rgba(18,21,32,.97), rgba(10,12,18,.97));
         border: 1px solid var(--neon-border); border-radius: 14px;
         padding: 18px; z-index: 25;
@@ -492,7 +500,7 @@
     }
     #death-modal {
         display: none; position: absolute; top: 50%; left: 50%;
-        transform: translate(-50%, -50%); width: 360px;
+        transform: translate(-50%, -50%); width: 360px; max-width: calc(100% - 24px);
         background: linear-gradient(165deg, rgba(45,12,20,.97), rgba(18,6,10,.97));
         border: 1px solid rgba(255,77,109,.65); border-radius: 16px;
         padding: 30px 26px; text-align: center; z-index: 35;
@@ -501,6 +509,11 @@
     }
     #death-modal h2 { color: #ff6b81; margin: 0 0 8px; font-size: 24px; animation: blink 1.6s infinite; }
     #death-modal p { font-size: 12px; color: #b89299; margin: 0 0 6px; }
+
+    @media (max-width: 860px) {
+        #chat-container { width: 300px; height: 145px; }
+        #chat-toggle-floating { left: 168px; }
+    }
 </style>
 </head>
 <body>
@@ -606,13 +619,13 @@
     <!-- ปุ่มควบคุมทิศทาง (มุมซ้ายล่าง) -->
     <div id="control-pad-left">
         <div></div>
-        <div class="dpad-btn" onmousedown="setMoveDir('up')" onmouseup="stopMoveDir()" onmouseleave="stopMoveDir()" ontouchstart="setMoveDir('up')" ontouchend="stopMoveDir()">▲</div>
+        <div class="dpad-btn" data-dir="up">▲</div>
         <div></div>
-        <div class="dpad-btn" onmousedown="setMoveDir('left')" onmouseup="stopMoveDir()" onmouseleave="stopMoveDir()" ontouchstart="setMoveDir('left')" ontouchend="stopMoveDir()">◀</div>
+        <div class="dpad-btn" data-dir="left">◀</div>
         <div class="dpad-center">◈</div>
-        <div class="dpad-btn" onmousedown="setMoveDir('right')" onmouseup="stopMoveDir()" onmouseleave="stopMoveDir()" ontouchstart="setMoveDir('right')" ontouchend="stopMoveDir()">▶</div>
+        <div class="dpad-btn" data-dir="right">▶</div>
         <div></div>
-        <div class="dpad-btn" onmousedown="setMoveDir('down')" onmouseup="stopMoveDir()" onmouseleave="stopMoveDir()" ontouchstart="setMoveDir('down')" ontouchend="stopMoveDir()">▼</div>
+        <div class="dpad-btn" data-dir="down">▼</div>
         <div></div>
     </div>
 
@@ -632,7 +645,7 @@
 
     <!-- ระบบแชท -->
     <div id="chat-container">
-        <div id="chat-header" onmousedown="startDragChat(event)">
+        <div id="chat-header" onpointerdown="startDragChat(event)">
             <span>💬 ระบบแชทออนไลน์</span>
             <span class="chat-close" onclick="toggleChatWindow()">✕</span>
         </div>
@@ -694,11 +707,11 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
 <script>
+    // ================= STATE =================
     let isRegisterMode = false;
     let socket;
     let myData = null;          // ข้อมูลตัวละคร (จากเซิร์ฟเวอร์)
     let allPlayers = {};        // ผู้เล่นอื่นในแมพเดียวกัน
-    let activeDir = null;
     const moveSpeed = 3.2;
     let attackEffects = [];
     let hitFlashTimer = 0;
@@ -707,8 +720,12 @@
 
     let autoBotActive = false;
     let attackCooldown = 0;
-    let myInventory = [];       // แคชกระเป๋าไอเทมฝั่ง client (โหลดจาก /api/inventory)
-    let monsters = [];          // มอนสเตอร์ของแมพปัจจุบัน (ตำแหน่งกำหนดฝั่ง client, hp/ผลลัพธ์อ้างอิงเซิร์ฟเวอร์)
+    let myInventory = [];       // แคชกระเป๋าไอเทมฝั่ง client
+    let monsters = [];          // มอนสเตอร์ของแมพปัจจุบัน
+
+    // canvas ประกาศไว้ด้านบน เพราะระบบอินพุตต้องใช้ตั้งแต่ตอนตั้งค่า
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
     const JOB_ICONS = { Novice: '🌱', Warrior: '⚔️', Mage: '🔮', Archer: '🏹' };
     const ITEM_ICONS = { potion: '🧪', weapon: '⚔️', sword: '⚔️', armor: '🛡️', shield: '🛡️', helmet: '⛑️', boots: '👟', ring: '💍', accessory: '💍' };
@@ -742,7 +759,9 @@
         if (!user || !pass) { msgEl.innerText = 'กรุณากรอกข้อมูลให้ครบถ้วน'; return; }
 
         const endpoint = isRegisterMode ? '/api/register' : '/api/login';
-        const payload = isRegisterMode ? { username: user, password: pass, job: job } : { username: user, password: pass };
+        const payload = isRegisterMode
+            ? { username: user, password: pass, job: job }
+            : { username: user, password: pass };
 
         try {
             const res = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -782,11 +801,13 @@
         updateUIValues();
         loadMonsters();
         loadInventory();
+        fitGameToScreen();
         setInterval(autoBotTick, 350);
         gameLoop();
     }
 
     function showNotice(text) {
+        if (!text) return;
         const notice = document.getElementById('game-notice');
         notice.innerText = text; notice.style.display = 'block';
         clearTimeout(notice._t);
@@ -808,6 +829,7 @@
 
     function changeMap(map) {
         if (myData.isDead) return;
+        stopAllMovement();
         myData.map = map; myData.x = 400; myData.y = 300;
         allPlayers = {};
         loadMonsters();
@@ -824,7 +846,8 @@
     }
 
     function autoBotTick() {
-        if (!autoBotActive || myData.isDead || myData.map === 'town') return;
+        if (!autoBotActive || !myData || myData.isDead || myData.map === 'town') return;
+        if (isPlayerControlling()) return;   // ผู้เล่นสั่งเดินเอง บอทหลีกทางให้
 
         // ดื่มยาอัตโนมัติเมื่อเลือดต่ำกว่า 40%
         if (myData.hp < myData.maxHp * 0.4) {
@@ -841,7 +864,7 @@
             socket.emit('move', { x: myData.x, y: myData.y, map: myData.map });
         } else if (attackCooldown <= 0) {
             socket.emit('attack_monster', { monster_id: target.id });
-            attackCooldown = 2; // ~700ms กันสแปม
+            attackCooldown = 2;
         }
     }
 
@@ -857,7 +880,8 @@
 
     // ---------------- ATTACK / ITEMS ----------------
     function manualAttackAction() {
-        if (myData.isDead || myData.map === 'town') { showNotice(myData.map === 'town' ? 'ในเมืองต่อสู้ไม่ได้' : ''); return; }
+        if (!myData || myData.isDead) return;
+        if (myData.map === 'town') { showNotice('ในเมืองต่อสู้ไม่ได้'); return; }
         const target = monsters.find(m => m.hp_left > 0 && Math.abs(myData.x - m.x) < 70 && Math.abs(myData.y - m.y) < 70);
         if (!target) { showNotice("ไม่มีมอนสเตอร์ในระยะโจมตี!"); return; }
         socket.emit('attack_monster', { monster_id: target.id });
@@ -873,12 +897,13 @@
             myData = { ...myData, ...res.user };
             if (res.leveled_up) showNotice(`🎉 Level Up! เลเวลอัพเป็น ${myData.level}`);
             if (m) { m.x = 120 + Math.random() * 600; m.y = 140 + Math.random() * 400; m.hp_left = m.hp; }
+            if (pendingAttackId === res.monster_id) { pendingAttackId = null; moveTarget = null; }
         } else {
             myData.hp = res.player_hp_left;
             hitFlashTimer = 10;
             if (res.player_hp_left <= 0) {
                 myData.isDead = true;
-                activeDir = null;
+                stopAllMovement();
                 document.getElementById('death-modal').style.display = 'block';
                 autoBotActive = false; document.getElementById('combat-toggle-switch').classList.remove('on');
             }
@@ -904,6 +929,7 @@
         const data = await res.json();
         if (data.success) myData = { ...myData, ...data.user };
         myData.isDead = false;
+        stopAllMovement();
         document.getElementById('death-modal').style.display = 'none';
         allPlayers = {};
         loadMonsters();
@@ -964,7 +990,7 @@
         const data = await res.json();
         const box = document.getElementById('quest-list');
         box.innerHTML = '';
-        data.quests.forEach(q => {
+        (data.quests || []).forEach(q => {
             const pct = Math.max(0, Math.min(100, (q.progress / (q.target_count || 1)) * 100));
             const stCls = q.status === 'done' ? 'st-done' : q.status === 'claimed' ? 'st-claimed' : 'st-progress';
             const stLabel = q.status === 'done' ? 'พร้อมรับรางวัล' : q.status === 'claimed' ? 'รับแล้ว' : 'กำลังทำเควส';
@@ -990,6 +1016,7 @@
 
     function openModal(id) {
         if (myData.isDead) return;
+        stopAllMovement();
         document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
         document.getElementById(id).style.display = 'block';
         if (id === 'shopModal') loadShop();
@@ -1036,6 +1063,7 @@
         if (channel === 'whisper') payload.target_sid = document.getElementById('chat-target').value.trim();
         socket.emit('send_chat', payload);
         input.value = "";
+        input.blur();
     }
     function appendChatMessage(channel, username, message) {
         chatHistory.push({ channel, username, message, time: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) });
@@ -1053,45 +1081,169 @@
     }
     function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-    // Drag chat window
-    let isDraggingChat = false, chatStartX = 0, chatStartY = 0;
+    // ---- ลากหน้าต่างแชท (Pointer Events: เมาส์ + นิ้ว) ----
+    let chatDragId = null, chatStartX = 0, chatStartY = 0;
     function startDragChat(e) {
-        isDraggingChat = true;
+        if (e.target.classList.contains('chat-close')) return;
         const c = document.getElementById('chat-container');
-        chatStartX = e.clientX - c.offsetLeft; chatStartY = e.clientY - c.offsetTop;
-        document.addEventListener('mousemove', dragChat);
-        document.addEventListener('mouseup', stopDragChat);
+        chatDragId = e.pointerId;
+        e.currentTarget.setPointerCapture(e.pointerId);
+        chatStartX = e.clientX - c.offsetLeft;
+        chatStartY = e.clientY - c.offsetTop;
+        document.addEventListener('pointermove', dragChat);
+        document.addEventListener('pointerup', stopDragChat);
+        document.addEventListener('pointercancel', stopDragChat);
     }
     function dragChat(e) {
-        if (!isDraggingChat) return;
+        if (chatDragId === null || e.pointerId !== chatDragId) return;
         const c = document.getElementById('chat-container');
-        c.style.left = (e.clientX - chatStartX) + 'px'; c.style.bottom = 'unset';
+        c.style.left = (e.clientX - chatStartX) + 'px';
+        c.style.bottom = 'unset';
         c.style.top = (e.clientY - chatStartY) + 'px';
     }
     function stopDragChat() {
-        isDraggingChat = false;
-        document.removeEventListener('mousemove', dragChat);
-        document.removeEventListener('mouseup', stopDragChat);
+        chatDragId = null;
+        document.removeEventListener('pointermove', dragChat);
+        document.removeEventListener('pointerup', stopDragChat);
+        document.removeEventListener('pointercancel', stopDragChat);
     }
 
-    // ---------------- MOVEMENT ----------------
-    function setMoveDir(dir) { if (myData.isDead) return; activeDir = dir; }
-    function stopMoveDir() { activeDir = null; }
-    window.addEventListener('keydown', (e) => {
-        const tag = (e.target && e.target.tagName) || '';
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return; // กันพิมพ์แชทแล้วตัวละครวิ่ง
-        const k = e.key.toLowerCase();
-        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
-        if (['arrowup', 'w'].includes(k)) activeDir = 'up';
-        else if (['arrowdown', 's'].includes(k)) activeDir = 'down';
-        else if (['arrowleft', 'a'].includes(k)) activeDir = 'left';
-        else if (['arrowright', 'd'].includes(k)) activeDir = 'right';
-    });
-    window.addEventListener('keyup', (e) => {
-        const k = e.key.toLowerCase();
-        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd'].includes(k)) activeDir = null;
+    // ================= MOVEMENT (Pointer Events: mouse + touch + pen) =================
+    const DIR_VEC = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+    const heldDirs = new Set();      // D-pad
+    const heldKeys = new Set();      // WASD / ลูกศร
+    let moveTarget = null;           // จุดหมายจากการคลิก/แตะ
+    let dragState  = null;           // จอยสติ๊กเสมือน
+    let pendingAttackId = null;      // แตะมอนสเตอร์ = เดินไปตีอัตโนมัติ
+    let lastMoveEmit = 0, wasMoving = false;
+
+    const TAP_PX = 14, TAP_MS = 320, JOY_DEAD = 20, JOY_MAX = 48;
+
+    function stopAllMovement() {
+        heldDirs.clear(); heldKeys.clear();
+        dragState = null; moveTarget = null; pendingAttackId = null;
+        document.querySelectorAll('.dpad-btn').forEach(b => b.classList.remove('held'));
+    }
+    function isPlayerControlling() {
+        return heldDirs.size > 0 || heldKeys.size > 0 || !!moveTarget || !!(dragState && dragState.moved);
+    }
+
+    // แปลงพิกัดหน้าจอ -> พิกัดในแคนวาส (รองรับตอนเกมถูกย่อสเกล)
+    function toCanvasPos(e) {
+        const r = canvas.getBoundingClientRect();
+        return {
+            x: (e.clientX - r.left) * (canvas.width  / r.width),
+            y: (e.clientY - r.top ) * (canvas.height / r.height)
+        };
+    }
+
+    // --- D-pad ---
+    document.querySelectorAll('.dpad-btn').forEach(btn => {
+        const dir = btn.dataset.dir;
+        const release = () => { heldDirs.delete(dir); btn.classList.remove('held'); };
+        btn.addEventListener('pointerdown', e => {
+            e.preventDefault();
+            if (!myData || myData.isDead) return;
+            btn.setPointerCapture(e.pointerId);
+            heldDirs.add(dir); btn.classList.add('held');
+            moveTarget = null; pendingAttackId = null;
+        });
+        btn.addEventListener('pointerup', release);
+        btn.addEventListener('pointercancel', release);
+        btn.addEventListener('lostpointercapture', release);
+        btn.addEventListener('contextmenu', e => e.preventDefault());
     });
 
+    // --- คลิก/แตะบนแคนวาส: แตะสั้น = เดินไปจุดนั้น, ลาก = จอยสติ๊ก ---
+    canvas.addEventListener('pointerdown', e => {
+        if (!myData || myData.isDead) return;
+        canvas.setPointerCapture(e.pointerId);
+        const p = toCanvasPos(e);
+        dragState = { id: e.pointerId, sx: p.x, sy: p.y, cx: p.x, cy: p.y, t0: performance.now(), moved: false };
+    });
+    canvas.addEventListener('pointermove', e => {
+        if (!dragState || e.pointerId !== dragState.id) return;
+        const p = toCanvasPos(e);
+        dragState.cx = p.x; dragState.cy = p.y;
+        if (Math.hypot(p.x - dragState.sx, p.y - dragState.sy) > JOY_DEAD) {
+            dragState.moved = true; moveTarget = null; pendingAttackId = null;
+        }
+    });
+    canvas.addEventListener('pointerup', e => {
+        if (!dragState || e.pointerId !== dragState.id) return;
+        const dist = Math.hypot(dragState.cx - dragState.sx, dragState.cy - dragState.sy);
+        const dt = performance.now() - dragState.t0;
+        if (!dragState.moved && dist < TAP_PX && dt < TAP_MS) {
+            const tx = dragState.cx, ty = dragState.cy;
+            const mon = monsters.find(m => m.hp_left > 0 && Math.hypot(m.x - tx, m.y - ty) < (m.boss ? 26 : 20));
+            if (mon && myData.map !== 'town') {            // แตะมอนสเตอร์ = เดินเข้าไปตี
+                pendingAttackId = mon.id;
+                moveTarget = { x: mon.x, y: mon.y };
+            } else {                                        // แตะพื้น = เดินไปจุดนั้น
+                pendingAttackId = null;
+                moveTarget = {
+                    x: Math.max(20, Math.min(canvas.width  - 20, tx)),
+                    y: Math.max(20, Math.min(canvas.height - 20, ty))
+                };
+            }
+        }
+        dragState = null;
+    });
+    canvas.addEventListener('pointercancel', () => { dragState = null; });
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+    // --- คีย์บอร์ด ---
+    window.addEventListener('keydown', e => {
+        const tag = (e.target && e.target.tagName) || '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        const k = e.key.toLowerCase();
+        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) e.preventDefault();
+        if (['arrowup', 'w', 'arrowdown', 's', 'arrowleft', 'a', 'arrowright', 'd'].includes(k)) {
+            heldKeys.add(k); moveTarget = null; pendingAttackId = null;
+        }
+        if (k === ' ') manualAttackAction();
+        if (k === 'escape') document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    });
+    window.addEventListener('keyup', e => heldKeys.delete(e.key.toLowerCase()));
+    window.addEventListener('blur', () => { heldDirs.clear(); heldKeys.clear(); document.querySelectorAll('.dpad-btn').forEach(b => b.classList.remove('held')); });
+
+    // --- รวมอินพุตทั้งหมดเป็นเวกเตอร์ทิศทางเดียว ---
+    function currentMoveVector() {
+        let x = 0, y = 0;
+        heldDirs.forEach(d => { x += DIR_VEC[d][0]; y += DIR_VEC[d][1]; });
+        if (heldKeys.has('arrowup')    || heldKeys.has('w')) y -= 1;
+        if (heldKeys.has('arrowdown')  || heldKeys.has('s')) y += 1;
+        if (heldKeys.has('arrowleft')  || heldKeys.has('a')) x -= 1;
+        if (heldKeys.has('arrowright') || heldKeys.has('d')) x += 1;
+
+        if (!x && !y && dragState && dragState.moved) {
+            x = dragState.cx - dragState.sx;
+            y = dragState.cy - dragState.sy;
+        }
+        if (!x && !y && moveTarget) {
+            const dx = moveTarget.x - myData.x, dy = moveTarget.y - myData.y;
+            const d  = Math.hypot(dx, dy);
+            const stopAt = pendingAttackId ? 42 : moveSpeed + 1;   // ถ้าจะตี หยุดที่ระยะโจมตี
+            if (d <= stopAt) {
+                moveTarget = null;
+                if (pendingAttackId) { manualAttackAction(); pendingAttackId = null; }
+            } else { x = dx; y = dy; }
+        }
+        const len = Math.hypot(x, y);
+        return len ? { x: x / len, y: y / len } : { x: 0, y: 0 };  // normalize กันเดินทแยงเร็วผิดปกติ
+    }
+
+    // --- ย่อเกมให้พอดีจอมือถือ ---
+    function fitGameToScreen() {
+        const wrap = document.getElementById('game-wrapper');
+        if (!wrap) return;
+        const s = Math.min(window.innerWidth / 820, window.innerHeight / 620, 1);
+        wrap.style.transform = `scale(${s})`;
+    }
+    window.addEventListener('resize', fitGameToScreen);
+    window.addEventListener('orientationchange', () => setTimeout(fitGameToScreen, 250));
+
+    // ---------------- UI ----------------
     function updateUIValues() {
         const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
         set('ui-name', myData.username);
@@ -1118,9 +1270,7 @@
         const av = document.getElementById('hud-avatar-icon'); if (av) av.innerText = JOB_ICONS[myData.job] || '👤';
     }
 
-    // ---------------- RENDER LOOP ----------------
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    // ---------------- RENDER ----------------
     const MAP_THEMES = {
         town:    { top: '#22344f', bot: '#101a2a', dot: 'rgba(140,180,255,0.05)',  ambient: '110,170,255' },
         forest:  { top: '#123524', bot: '#081c11', dot: 'rgba(90,230,150,0.06)',   ambient: '80,220,140' },
@@ -1167,7 +1317,7 @@
         const th = MAP_THEMES[myData.map] || MAP_THEMES.town;
         const t = Date.now() / 1000;
 
-        // พื้นหลังไล่เฉด + แสงวamb เดินช้าๆ
+        // พื้นหลังไล่เฉด + แสงแอมเบียนต์เดินช้าๆ
         const bg = ctx.createLinearGradient(0, 0, 0, H);
         bg.addColorStop(0, th.top); bg.addColorStop(1, th.bot);
         ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
@@ -1177,7 +1327,7 @@
         amb.addColorStop(0, `rgba(${th.ambient},0.07)`); amb.addColorStop(1, `rgba(${th.ambient},0)`);
         ctx.fillStyle = amb; ctx.fillRect(0, 0, W, H);
 
-        // ของตกแต่งแมพ (ตำแหน่งคงที่ ไม่กระพริบ)
+        // ของตกแต่งแมพ
         const decor = seededDecor(myData.map);
         ctx.fillStyle = th.dot;
         decor.forEach(d => { ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill(); });
@@ -1223,6 +1373,15 @@
                 const r = m.boss ? 19 : 13;
                 const bob = Math.sin(Date.now() / 380 + m.x * 0.05) * 2.5;
                 const my = m.y + bob;
+
+                // วงไฮไลต์เป้าหมายที่กำลังจะไปตี
+                if (pendingAttackId === m.id) {
+                    ctx.save();
+                    ctx.strokeStyle = `rgba(255,209,102,${0.5 + 0.3 * Math.sin(t * 7)})`;
+                    ctx.lineWidth = 2; ctx.setLineDash([5, 5]);
+                    ctx.beginPath(); ctx.arc(m.x, my, r + 12, 0, Math.PI * 2); ctx.stroke();
+                    ctx.restore();
+                }
 
                 ctx.save();
                 ctx.shadowColor = m.boss ? 'rgba(255,45,85,0.75)' : 'rgba(200,60,50,0.55)';
@@ -1318,7 +1477,30 @@
             eff.life--; return eff.life > 0;
         });
 
-        // Vignette บรรยากาศ + แดงวาบเมื่อโดนตี
+        // เครื่องหมายจุดหมาย (click-to-move)
+        if (moveTarget) {
+            const pulse = 1 + Math.sin(t * 8) * 0.18;
+            ctx.save();
+            ctx.strokeStyle = pendingAttackId ? 'rgba(255,209,102,.85)' : 'rgba(0,255,204,.8)';
+            ctx.lineWidth = 2; ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 12;
+            ctx.beginPath(); ctx.arc(moveTarget.x, moveTarget.y, 12 * pulse, 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath(); ctx.arc(moveTarget.x, moveTarget.y, 3, 0, Math.PI * 2); ctx.stroke();
+            ctx.restore();
+        }
+
+        // จอยสติ๊กเสมือน
+        if (dragState && dragState.moved) {
+            const dx = dragState.cx - dragState.sx, dy = dragState.cy - dragState.sy;
+            const d = Math.min(Math.hypot(dx, dy), JOY_MAX), a = Math.atan2(dy, dx);
+            ctx.save(); ctx.globalAlpha = .55;
+            ctx.strokeStyle = 'rgba(0,255,204,.55)'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(dragState.sx, dragState.sy, JOY_MAX, 0, Math.PI * 2); ctx.stroke();
+            ctx.fillStyle = 'rgba(0,255,204,.35)';
+            ctx.beginPath(); ctx.arc(dragState.sx + Math.cos(a) * d, dragState.sy + Math.sin(a) * d, 18, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+        }
+
+        // Vignette + แดงวาบเมื่อโดนตี
         const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, H * 0.85);
         vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.42)');
         ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
@@ -1330,20 +1512,24 @@
         }
     }
 
+    // ---------------- GAME LOOP ----------------
     function gameLoop() {
-        if (!myData.isDead) {
-            if (activeDir) {
-                if (activeDir === 'up') myData.y -= moveSpeed;
-                if (activeDir === 'down') myData.y += moveSpeed;
-                if (activeDir === 'left') myData.x -= moveSpeed;
-                if (activeDir === 'right') myData.x += moveSpeed;
-                myData.x = Math.max(20, Math.min(canvas.width - 20, myData.x));
-                myData.y = Math.max(20, Math.min(canvas.height - 20, myData.y));
-                socket.emit('move', { x: myData.x, y: myData.y, map: myData.map });
+        if (myData && !myData.isDead) {
+            const v = currentMoveVector();
+            const moving = !!(v.x || v.y);
+            if (moving) {
+                myData.x = Math.max(20, Math.min(canvas.width  - 20, myData.x + v.x * moveSpeed));
+                myData.y = Math.max(20, Math.min(canvas.height - 20, myData.y + v.y * moveSpeed));
             }
+            const now = performance.now();
+            if ((moving && now - lastMoveEmit > 66) || (!moving && wasMoving)) {   // ส่งไม่เกิน ~15 ครั้ง/วินาที
+                socket.emit('move', { x: myData.x, y: myData.y, map: myData.map });
+                lastMoveEmit = now;
+            }
+            wasMoving = moving;
         }
         if (attackCooldown > 0) attackCooldown--;
-        if (hitFlashTimer > 0) hitFlashTimer--;
+        if (hitFlashTimer  > 0) hitFlashTimer--;
 
         drawScene();
         requestAnimationFrame(gameLoop);
