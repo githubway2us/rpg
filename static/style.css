@@ -1,0 +1,1449 @@
+/* LUMIVARA ONLINE — modern dark-fantasy MMORPG UI
+   (Login + Shop + All UI polished)
+*/
+
+/* ========== 1. Design tokens ========== */
+:root {
+  --bg: #050608;
+  --panel: rgba(10, 17, 31, .88);
+  --line: rgba(117, 151, 210, .24);
+  --line-bright: rgba(83, 219, 255, .5);
+  --text: #edf5ff;
+  --muted: #91a4c1;
+  --neon: #53dbff;
+  --violet: #a78bfa;
+  --gold: #ffd36a;
+  --green: #49edb0;
+  --red: #ff5577;
+  --shadow: 0 18px 55px rgba(0, 0, 0, .42);
+
+  --z-fx: 2;
+  --z-hud: 10;
+  --z-controls: 11;
+  --z-menu: 12;
+  --z-chat-toggle: 16;
+  --z-chat: 20;
+  --z-modal: 25;
+  --z-flash: 30;
+  --z-notice: 40;
+  --z-death: 50;
+  --z-auth: 100;
+
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+
+  --edge: 18px;
+  --pad-edge: 22px;
+  --hud-w: 248px;
+  --dpad: 52px;
+  --skill: 53px;
+  --chat-w: 340px;
+  --chat-h: 245px;
+}
+
+/* ========== 2. Base ========== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  margin: 0; padding: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--bg);
+}
+
+body {
+  color: var(--text);
+  font-family: 'Kanit', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button, input, select, textarea { font: inherit; color: var(--text); }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+:is(button, input, select, textarea):focus-visible { outline: 2px solid var(--neon); outline-offset: 2px; }
+input::placeholder, textarea::placeholder { color: #687b98; }
+
+/* ========== 3. Game surface ========== */
+#game-wrapper {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: #080d17;          /* สีพื้นหลังปกติ */
+  background-image: none;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-image 0.4s ease;
+}
+
+/* ===== พื้นหลังเฉพาะเมือง ===== */
+#game-wrapper.town-bg {
+  background-image: url('/static/images/town.png'); /* ← path รูปของคุณ */
+}
+
+/* ชั้นมืดบาง ๆ ทับภาพพื้นหลัง (ไม่บัง canvas) */
+#game-wrapper.town-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+  z-index: 1;
+}
+
+#game-wrapper :is(input, textarea, #chat-messages) {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+#gameCanvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: transparent;          /* สำคัญ: ให้เห็นพื้นหลังด้านหลัง */
+  touch-action: none;
+  z-index: 2;                       /* ให้อยู่เหนือ ::before */
+}
+
+/* ========== 4. Character HUD ========== */
+#hud-top-left {
+  position: absolute; z-index: var(--z-hud);
+  top: calc(10px + var(--safe-t)); left: calc(10px + var(--safe-l));
+  width: min(var(--hud-w), calc(100vw - 20px));
+  pointer-events: none;
+}
+.hud-main {
+  display: flex; align-items: flex-start; gap: 8px; padding: 8px;
+  border: 1px solid var(--line); border-radius: 12px;
+  background: linear-gradient(135deg, rgba(8,14,26,.78), rgba(12,20,36,.64));
+  box-shadow: 0 6px 20px rgba(0,0,0,.2);
+}
+.hud-main > div:last-child { min-width: 0; flex: 1; }
+.avatar-circle {
+  flex: 0 0 36px; width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border: 1px solid rgba(83,219,255,.65); border-radius: 10px;
+  background: linear-gradient(145deg, #203d61, #11172b);
+  box-shadow: 0 0 22px rgba(83,219,255,.13), inset 0 0 14px rgba(83,219,255,.1);
+  font-size: 19px;
+}
+.hud-title { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin: 0 0 4px; font-weight: 600; font-size: 12px; }
+#ui-name { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.job-chip, .lv-chip { padding: 1px 4px; border-radius: 6px; font: 600 8px 'Orbitron', sans-serif; letter-spacing: .3px; }
+.job-chip { color: #d4c5ff; background: rgba(167,139,250,.14); border: 1px solid rgba(167,139,250,.28); }
+.lv-chip  { color: var(--gold); background: rgba(255,211,106,.1); border: 1px solid rgba(255,211,106,.25); }
+
+.bar-wrap { position: relative; height: 11px; margin: 3px 0; overflow: hidden; border-radius: 4px; background: rgba(1,4,11,.72); border: 1px solid rgba(255,255,255,.08); }
+.bar-fill { height: 100%; border-radius: 4px; transition: width .25s ease; }
+.bar-wrap.hp  .bar-fill { background: linear-gradient(90deg,#e63859,#ff6d83); box-shadow: 0 0 14px rgba(255,65,99,.28); }
+.bar-wrap.mp  .bar-fill { background: linear-gradient(90deg,#3865ee,#52caff); box-shadow: 0 0 14px rgba(65,140,255,.25); }
+.bar-wrap.exp .bar-fill { background: linear-gradient(90deg,#8d5cff,#d2a0ff); }
+.bar-text { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 8px; font-weight: 500; text-shadow: 0 1px 3px #000; }
+.hud-gold { margin-top: 3px; color: var(--gold); font-size: 10px; }
+.g-unit { color: #b4c1d5; font-size: 10px; }
+
+/* ========== 5. Top-right menu (ย่อ/ขยายได้) & minimap ========== */
+
+/* เมนูด้านบน */
+#hud-menu {
+  position: absolute;
+  z-index: var(--z-menu);
+  top: calc(var(--edge) + var(--safe-t));
+  right: calc(var(--edge) + var(--safe-r));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: none;
+}
+
+#hud-menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 520px;
+  overflow: hidden;
+  opacity: 1;
+  transform: translateY(0);
+  transition: max-height 0.3s ease, opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* โหมดย่อ */
+#hud-menu.collapsed #hud-menu-buttons {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.menu-btn {
+  min-width: 44px;
+  height: 44px;
+  padding: 0 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--panel);
+  color: #dceaff;
+  box-shadow: 0 7px 22px rgba(0,0,0,.2);
+  transition: transform .18s, border-color .18s, background .18s, box-shadow .18s;
+  font-size: 16px;
+}
+
+.menu-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--neon);
+  background: rgba(24,42,65,.96);
+  box-shadow: 0 0 18px rgba(83,219,255,.14);
+}
+
+/* ปุ่มย่อ/ขยายเมนู */
+.menu-toggle {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  padding: 0 !important;
+  font-size: 18px !important;
+  background: linear-gradient(135deg, #1a1f2e, #0d111a) !important;
+  border: 1px solid #3a4a6b !important;
+  border-radius: 12px !important;
+  box-shadow: 0 0 14px rgba(0, 180, 255, 0.28);
+  color: var(--neon) !important;
+}
+
+.menu-toggle:hover {
+  background: linear-gradient(135deg, #243044, #152033) !important;
+  border-color: #5a7ab8 !important;
+  box-shadow: 0 0 18px rgba(83, 219, 255, 0.35);
+}
+
+/* Minimap */
+#minimap-box {
+  position: absolute;
+  top: calc(12px + var(--safe-t));
+  right: calc(70px + var(--safe-r));
+  background: rgba(10, 17, 31, 0.85);
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: var(--z-menu);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  max-width: 160px;
+}
+
+#minimap-box .mm-title {
+  font-size: 11px;
+  color: var(--neon);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#map-select {
+  background: rgba(20, 30, 48, 0.9);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-family: 'Kanit', sans-serif;
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+#map-select:hover,
+#map-select:focus {
+  border-color: var(--neon);
+}
+
+/* ========== 6. Controls (D-pad ชัดเจน + ปุ่มขวา) ========== */
+
+/* D-pad ซ้าย */
+#control-pad-left {
+  position: absolute;
+  bottom: calc(20px + var(--safe-b));
+  left: calc(16px + var(--safe-l));
+  display: grid;
+  grid-template-columns: 54px 54px 54px;
+  grid-template-rows: 54px 54px 54px;
+  gap: 6px;
+  z-index: var(--z-controls);
+  opacity: 0.95;
+  user-select: none;
+  pointer-events: auto;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(10, 17, 31, 0.4);
+  border: 1px solid rgba(83, 219, 255, 0.18);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+}
+
+.dpad-btn {
+  width: 54px;
+  height: 54px;
+  background: linear-gradient(145deg, #1e2a3a, #0f1620);
+  border: 2px solid #3d5a80;
+  border-radius: 14px;
+  color: #7ec8ff;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 4px 0 #0a1018,
+    0 0 14px rgba(0, 160, 255, 0.22),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: all 0.12s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dpad-btn[data-dir="up"]    { grid-column: 2; grid-row: 1; }
+.dpad-btn[data-dir="left"]  { grid-column: 1; grid-row: 2; }
+.dpad-btn[data-dir="right"] { grid-column: 3; grid-row: 2; }
+.dpad-btn[data-dir="down"]  { grid-column: 2; grid-row: 3; }
+
+.dpad-btn:active,
+.dpad-btn.held,
+.dpad-btn.pressed {
+  transform: translateY(3px) scale(0.96);
+  box-shadow:
+    0 1px 0 #0a1018,
+    0 0 12px rgba(0, 200, 255, 0.45),
+    inset 0 2px 6px rgba(0,0,0,0.45);
+  background: linear-gradient(145deg, #2a3a50, #152030);
+  color: #b8e0ff;
+  border-color: #5a90d0;
+}
+
+.dpad-center {
+  grid-column: 2;
+  grid-row: 2;
+  width: 54px;
+  height: 54px;
+  background: radial-gradient(circle, #1a2535 30%, #0c121c 100%);
+  border: 2px solid #2a3a50;
+  border-radius: 50%;
+  color: #4a6a8a;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+  opacity: 0.75;
+}
+
+/* แผงขวา */
+#control-pad-right {
+  position: absolute;
+  bottom: calc(20px + var(--safe-b));
+  right: calc(16px + var(--safe-r));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  z-index: var(--z-controls);
+  user-select: none;
+  pointer-events: auto;
+}
+
+#skill-row {
+  display: flex;
+  gap: 8px;
+}
+
+.quick-slot {
+  width: 48px;
+  height: 48px;
+  background: rgba(10, 17, 31, 0.85);
+  border: 2px solid rgba(167, 139, 250, 0.4);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 20px;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: transform 0.1s, border-color 0.2s;
+}
+
+.quick-slot:active {
+  transform: scale(0.92);
+  border-color: var(--neon);
+}
+
+.quick-slot .slot-count {
+  position: absolute;
+  bottom: 2px;
+  right: 4px;
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 0 4px;
+  border-radius: 4px;
+  color: #ffd166;
+}
+
+.right-bottom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#attack-action-btn {
+  width: 76px;
+  height: 76px;
+  background: linear-gradient(135deg, #ff4757, #ff6b81);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+  transition: all 0.1s ease;
+}
+
+#attack-action-btn:active {
+  transform: scale(0.93);
+  background: linear-gradient(135deg, #ff2e43, #ff4757);
+  box-shadow: 0 2px 10px rgba(255, 71, 87, 0.6);
+}
+
+#attack-action-btn .atk-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+#attack-action-btn .atk-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* ปุ่มบอทเร็ว (ถ้ามี) */
+#quick-bot-btn {
+  position: absolute;
+  top: -42px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(10, 17, 31, 0.9);
+  border: 2px solid rgba(167, 139, 250, 0.4);
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+  z-index: 60;
+}
+
+#quick-bot-btn.active,
+body.bot-active #quick-bot-btn {
+  border-color: var(--neon);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.7);
+  background: rgba(0, 255, 204, 0.2);
+}
+
+/* ========== Responsive สำหรับเมนู + D-pad ========== */
+@media (max-width: 760px) {
+  .menu-btn {
+    min-width: 38px;
+    height: 38px;
+    padding: 0 8px;
+    border-radius: 11px;
+    font-size: 15px;
+  }
+
+  .menu-toggle {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    font-size: 16px !important;
+  }
+
+  #minimap-box {
+    top: calc(58px + var(--safe-t));
+    right: calc(12px + var(--safe-r));
+    max-width: 140px;
+  }
+
+  #control-pad-left {
+    bottom: calc(14px + var(--safe-b));
+    left: calc(10px + var(--safe-l));
+    grid-template-columns: 58px 58px 58px;
+    grid-template-rows: 58px 58px 58px;
+    gap: 5px;
+    padding: 6px;
+  }
+
+  .dpad-btn,
+  .dpad-center {
+    width: 58px;
+    height: 58px;
+    font-size: 24px;
+  }
+
+  .quick-slot {
+    width: 44px;
+    height: 44px;
+    font-size: 19px;
+  }
+
+  #attack-action-btn {
+    width: 68px;
+    height: 68px;
+  }
+}
+
+@media (max-width: 420px) {
+  .menu-btn {
+    min-width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .menu-toggle {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+  }
+
+  #control-pad-left {
+    grid-template-columns: 50px 50px 50px;
+    grid-template-rows: 50px 50px 50px;
+  }
+
+  .dpad-btn,
+  .dpad-center {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+}
+
+/* ========== 7. Chat ========== */
+#chat-container {
+  position: absolute; z-index: var(--z-chat);
+  left: calc(var(--edge) + var(--safe-l)); bottom: calc(var(--edge) + var(--safe-b));
+  width: min(var(--chat-w), calc(100vw - var(--edge) * 2)); height: var(--chat-h);
+  display: flex; flex-direction: column; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 16px;
+  background: rgba(9,15,27,.94); box-shadow: var(--shadow);
+}
+#chat-toggle-floating {
+  position: absolute; z-index: var(--z-chat-toggle);
+  left: calc(var(--edge) + var(--safe-l));
+  bottom: calc(var(--edge) + var(--chat-h) + 10px + var(--safe-b));
+  width: 46px; height: 46px;
+  border: 1px solid var(--line); border-radius: 14px;
+  background: rgba(10,17,31,.9); box-shadow: var(--shadow); font-size: 20px;
+}
+#chat-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 13px; background: rgba(28,43,66,.8); border-bottom: 1px solid var(--line); color: var(--neon); font-weight: 600; cursor: move; }
+.chat-close { padding: 0 4px; color: var(--muted); cursor: pointer; }
+.chat-tabs, .shop-tabs { display: flex; gap: 6px; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.chat-tab {
+  flex: 1; padding: 7px 8px; border-radius: 9px;
+  color: var(--muted); font-size: 12px; font-weight: 500; text-align: center;
+  cursor: pointer; transition: all .2s ease;
+  background: rgba(255,255,255,.03);
+}
+.chat-tab.active, .chat-tab:hover {
+  color: var(--neon);
+  background: rgba(83,219,255,.12);
+  border: 1px solid rgba(83,219,255,.25);
+}
+#chat-messages { flex: 1; overflow: auto; padding: 9px 12px; color: #d1dced; font-size: 12px; }
+#chat-form { display: flex; gap: 6px; padding: 8px; border-top: 1px solid var(--line); }
+#chat-form input { flex: 1; width: 0; min-width: 0; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: #080e1a; }
+#chat-form #chat-target { flex: .65; }
+#chat-send { padding: 0 12px; border: 0; border-radius: 8px; background: var(--neon); color: #06101a; font-weight: 700; }
+
+/* ========== 8. Modals ========== */
+.modal {
+  position: absolute; z-index: var(--z-modal);
+  display: none;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(460px, calc(100vw - 28px)); max-height: min(80vh, 740px);
+  overflow: auto; padding: 22px;
+  border: 1px solid rgba(83,219,255,.35); border-radius: 20px;
+  background: linear-gradient(145deg, rgba(17,27,46,.98), rgba(8,13,24,.98));
+  box-shadow: 0 25px 90px rgba(0,0,0,.65), 0 0 35px rgba(83,219,255,.08);
+}
+.modal.open { display: block; }
+.modal h3 {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin: 0 0 18px; padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  color: #f4f8ff; font-size: 19px; font-weight: 600;
+}
+.close-btn {
+  width: 34px; height: 34px;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: rgba(255,255,255,.04); color: #c4d1e5;
+  transition: all .2s;
+}
+.close-btn:hover { color: var(--red); border-color: var(--red); background: rgba(255,85,119,.1); }
+
+/* Shop */
+.shop-tabs { margin-bottom: 14px; }
+#shop-buy-list, #shop-sell-list { display: flex; flex-direction: column; gap: 9px; }
+
+.shop-note {
+  margin: 0 0 4px;
+  padding: 11px 14px;
+  border: 1px solid rgba(255,211,106,.18);
+  border-radius: 11px;
+  background: rgba(255,211,106,.06);
+  color: #d4dce8;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  transition: all .2s ease;
+}
+.item-row:hover {
+  background: rgba(83,219,255,.06);
+  border-color: rgba(83,219,255,.35);
+  transform: translateY(-1px);
+}
+
+.item-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+.item-icon {
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border-radius: 10px;
+  background: rgba(83,219,255,.1);
+  border: 1px solid rgba(83,219,255,.2);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.item-main > div { min-width: 0; }
+.item-main > div > div:first-child {
+  font-weight: 600;
+  font-size: 14px;
+  color: #f0f6ff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.item-main .meta {
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.price {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+  margin-right: 6px;
+}
+
+.action-btn-sm {
+  padding: 7px 14px;
+  border: 1px solid rgba(83,219,255,.4);
+  border-radius: 9px;
+  background: rgba(83,219,255,.12);
+  color: var(--neon);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all .2s;
+}
+.action-btn-sm:hover {
+  background: rgba(83,219,255,.22);
+  border-color: var(--neon);
+  box-shadow: 0 0 14px rgba(83,219,255,.15);
+}
+.action-btn-sm.gold {
+  border-color: rgba(255,211,106,.4);
+  background: rgba(255,211,106,.12);
+  color: var(--gold);
+}
+.action-btn-sm.gold:hover {
+  background: rgba(255,211,106,.22);
+  border-color: var(--gold);
+  box-shadow: 0 0 14px rgba(255,211,106,.15);
+}
+
+.empty-state {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: rgba(255,255,255,.02);
+}
+
+.action-btn {
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px 16px;
+  border: 1px solid rgba(83,219,255,.45);
+  border-radius: 11px;
+  background: linear-gradient(110deg, #1c9fbb, #4265dd);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 8px 24px rgba(48,139,221,.18);
+  transition: filter .2s;
+}
+.action-btn:hover { filter: brightness(1.12); }
+.action-btn.gold {
+  background: linear-gradient(110deg, #c9a227, #e8b923);
+  border-color: rgba(255,211,106,.5);
+  box-shadow: 0 8px 24px rgba(255,211,106,.15);
+}
+.action-btn.danger {
+  background: linear-gradient(110deg, #e44865, #9e244d);
+  border-color: rgba(255,100,130,.6);
+}
+
+/* Other modal elements */
+.stat-row, .setting-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  margin: 6px 0; padding: 12px 10px;
+  border: 1px solid rgba(255,255,255,.055); border-radius: 11px;
+  background: rgba(255,255,255,.025);
+}
+.stat-row span, .setting-row > span { color: #aebed4; }
+.stat-row b { color: var(--neon); }
+.setting-row .meta { display: block; max-width: 280px; margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+
+.switch-toggle {
+  position: relative; flex: 0 0 auto; width: 43px; height: 24px;
+  border-radius: 99px; background: #354258; cursor: pointer; transition: background .2s;
+}
+.switch-toggle::after {
+  content: ""; position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; border-radius: 50%; background: #dce5f2; transition: transform .2s;
+}
+.switch-toggle.on { background: #147f91; box-shadow: 0 0 12px rgba(83,219,255,.15); }
+.switch-toggle.on::after { transform: translateX(19px); background: #fff; }
+
+input[type="number"], .mk-grid input, .auth-input {
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: rgba(4,9,18,.75);
+}
+input[type="range"], input[type="checkbox"] { accent-color: var(--neon); }
+
+/* Market */
+#marketModal { width: min(470px, calc(100vw - 28px)); }
+#marketModal canvas { max-width: 100%; }
+.mk-price-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0; }
+#mk-price { color: var(--gold); font: 700 20px 'Orbitron', sans-serif; }
+.mk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mk-grid label { display: block; margin-bottom: 5px; color: var(--muted); font-size: 11px; }
+.mk-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 13px; }
+.mk-btns button { padding: 10px 8px; border: 1px solid var(--line); border-radius: 9px; background: #17243a; font-weight: 600; }
+.mk-btns .mk-long  { background: rgba(24,155,111,.22); border-color: rgba(73,237,176,.35); color: var(--green); }
+.mk-btns .mk-short { background: rgba(210,51,85,.2);  border-color: rgba(255,85,119,.35); color: #ff8ca2; }
+.mk-btns .mk-close, .mk-btns .mk-cancel { color: #c5d2e5; }
+
+/* Admin */
+#adminModal .admin-label { display: block; margin: 12px 0 6px; color: var(--muted); font-size: 12px; }
+#adminModal textarea { width: 100%; resize: vertical; }
+#snd-vol { max-width: 180px; }
+.vol-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; }
+
+/* ========== 9. Auth / Login Screen (ปรับใหม่ให้สวย) ========== */
+#auth-screen {
+  position: fixed; inset: 0; z-index: var(--z-auth);
+  display: flex; justify-content: center; align-items: center;
+  overflow: auto; padding: 24px;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(83, 219, 255, 0.18), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(167, 139, 250, 0.12), transparent 50%),
+    linear-gradient(160deg, #05070f 0%, #0a1220 45%, #070b14 100%);
+}
+
+.auth-box {
+  width: min(420px, 100%);
+  padding: 36px 32px 32px;
+  border: 1px solid rgba(83, 219, 255, 0.28);
+  border-radius: 24px;
+  background: linear-gradient(165deg, rgba(14, 24, 42, 0.97), rgba(8, 13, 24, 0.98));
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.55),
+    0 0 60px rgba(83, 219, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* แสงวาวด้านบนของกล่อง */
+.auth-box::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(83, 219, 255, 0.6), transparent);
+}
+
+.auth-logo {
+  color: #f2fbff;
+  font: 800 clamp(30px, 8vw, 42px) 'Orbitron', sans-serif;
+  letter-spacing: 4px;
+  text-shadow: 0 0 28px rgba(83, 219, 255, 0.4);
+  line-height: 1.1;
+}
+
+.auth-sublogo {
+  margin-top: 4px;
+  color: var(--neon);
+  font: 600 13px 'Orbitron', sans-serif;
+  letter-spacing: 10px;
+  opacity: 0.9;
+}
+
+.auth-box h2 {
+  margin: 28px 0 18px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #eef5ff;
+}
+
+.auth-divider {
+  margin: 20px 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 28%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(117, 151, 210, 0.35));
+}
+.auth-divider::before { left: 0; }
+.auth-divider::after {
+  right: 0;
+  background: linear-gradient(90deg, rgba(117, 151, 210, 0.35), transparent);
+}
+
+.auth-input {
+  margin: 8px 0;
+  text-align: left;
+  background: rgba(4, 9, 18, 0.7) !important;
+  border: 1px solid rgba(117, 151, 210, 0.28) !important;
+  border-radius: 12px !important;
+  padding: 13px 16px !important;
+  font-size: 14px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.auth-input:focus {
+  border-color: rgba(83, 219, 255, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(83, 219, 255, 0.12);
+  outline: none;
+}
+
+.auth-btn {
+  margin-top: 18px;
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 13px;
+  background: linear-gradient(110deg, #1a9bb8, #3d5fd4);
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+  box-shadow: 0 10px 28px rgba(48, 139, 221, 0.28);
+  transition: transform .18s, filter .18s, box-shadow .18s;
+}
+.auth-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 32px rgba(48, 139, 221, 0.35);
+}
+.auth-btn:active {
+  transform: translateY(0);
+}
+
+.toggle-auth {
+  display: inline-block;
+  margin-top: 20px;
+  color: var(--neon);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity .2s;
+}
+.toggle-auth:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+#auth-msg {
+  margin-top: 14px;
+  color: var(--red);
+  font-size: 13px;
+  min-height: 20px;
+}
+
+/* Job cards */
+.job-cards {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+.job-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 12px;
+  border: 1px solid rgba(117, 151, 210, 0.25);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all .22s ease;
+}
+.job-card:hover {
+  border-color: rgba(83, 219, 255, 0.4);
+  background: rgba(83, 219, 255, 0.06);
+}
+.job-card.active {
+  border-color: var(--neon);
+  background: rgba(83, 219, 255, 0.1);
+  box-shadow: 0 0 22px rgba(83, 219, 255, 0.12);
+}
+.job-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+.job-card b {
+  font-size: 14px;
+  color: #f0f6ff;
+}
+.job-card span:last-child {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+/* ========== 10. Overlays ========== */
+#death-modal {
+  position: absolute; z-index: var(--z-death);
+  display: none; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(380px, calc(100vw - 30px)); padding: 26px; text-align: center;
+  border: 1px solid rgba(255,85,119,.55); border-radius: 20px;
+  background: rgba(23,10,22,.97); box-shadow: 0 0 60px rgba(255,45,88,.15);
+}
+#death-modal h2 { color: #ff7890; }
+#bot-badge {
+  position: absolute; z-index: var(--z-hud);
+  left: 50%; bottom: calc(15px + var(--safe-b)); transform: translateX(-50%);
+  padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px;
+  background: rgba(7,12,22,.8); color: var(--green); font-size: 11px;
+  pointer-events: none;
+}
+
+/* ========== 11. Responsive ========== */
+@media (min-width: 1100px) {
+  :root { --dpad: 58px; --skill: 60px; --chat-w: 370px; --chat-h: 270px; }
+  #hud-menu { gap: 10px; max-width: min(560px, 48vw); }
+  .menu-btn { min-width: 48px; height: 48px; }
+  #skill-row { max-width: min(520px, 48vw); }
+  #attack-action-btn { min-width: 132px; height: 76px; }
+}
+
+@media (max-width: 760px) {
+  :root { --edge: 9px; --pad-edge: 12px; --hud-w: 218px; --dpad: 42px; --skill: 42px; --chat-w: 290px; --chat-h: 190px; }
+  .hud-main { gap: 7px; padding: 7px; }
+  .avatar-circle { width: 32px; height: 32px; flex-basis: 32px; font-size: 17px; }
+  #ui-name { max-width: 76px; }
+
+  #hud-menu { gap: 5px; }
+  .menu-btn { min-width: 36px; height: 36px; padding: 0 8px; border-radius: 10px; font-size: 14px; }
+  #minimap-box { top: calc(55px + var(--safe-t)); min-width: 125px; padding: 7px; }
+  .mm-title { font-size: 10px; }
+  #map-select { padding: 5px; font-size: 11px; }
+
+
+/* ===== 🤖 ปุ่มเปิด-ปิดบอทบริเวณ D-pad ===== */
+#control-pad-left {
+  position: relative; /* ให้ปุ่มบอทอ้างอิงตำแหน่งได้ */
+}
+
+#quick-bot-btn {
+  position: absolute;
+  top: -38px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(10, 17, 31, 0.9);
+  border: 2px solid rgba(167, 139, 250, 0.4);
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+  z-index: 60;
+}
+
+/* เมื่อบอททำงานอยู่ ปุ่มจะเรืองแสงสีเขียว/นีออนกระพริบเท่ ๆ */
+#quick-bot-btn.active, body.bot-active #quick-bot-btn {
+  border-color: var(--neon, #00ffcc);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.7);
+  background: rgba(0, 255, 204, 0.2);
+}
+
+  .dpad-btn, .dpad-center { border-radius: 12px; font-size: 16px; }
+  #control-pad-right { gap: 8px; }
+  #skill-row { max-width: 58vw; gap: 5px; }
+  #skill-row button, .skill-btn { border-radius: 11px; }
+  .quick-slot { width: 43px; height: 43px; border-radius: 11px; font-size: 21px; }
+  #attack-action-btn { min-width: 83px; height: 52px; padding: 6px 10px; gap: 5px; border-radius: 13px; }
+  .atk-icon { font-size: 20px; }
+  .atk-label { font-size: 12px; }
+
+  #chat-toggle-floating { width: 40px; height: 40px; }
+  #chat-header { padding: 7px 10px; font-size: 12px; }
+  .chat-tabs, .shop-tabs { padding: 5px 7px; gap: 4px; }
+  .chat-tab { padding: 5px 4px; font-size: 11px; }
+  #chat-messages { font-size: 11px; }
+  #chat-form { padding: 5px; gap: 4px; }
+  #chat-form input { padding: 6px; font-size: 11px; }
+  #chat-send { padding: 0 8px; font-size: 11px; }
+
+  .modal { padding: 16px; border-radius: 16px; }
+  .modal h3 { font-size: 17px; }
+  .item-row { padding: 10px 12px; }
+  .item-icon { width: 34px; height: 34px; font-size: 18px; }
+  .action-btn-sm { padding: 6px 11px; font-size: 12px; }
+
+  #game-notice { top: calc(7px + var(--safe-t)); max-width: 65vw; padding: 7px 12px; font-size: 11px; }
+  #bot-badge { bottom: calc(5px + var(--safe-b)); font-size: 9px; }
+
+  .auth-box { padding: 28px 22px 24px; }
+  .auth-logo { letter-spacing: 3px; }
+}
+
+@media (max-width: 420px) {
+  :root { --dpad: 36px; --skill: 36px; --chat-w: 255px; --chat-h: 170px; }
+  .menu-btn { min-width: 32px; height: 32px; padding: 0 6px; }
+  #minimap-box { top: calc(48px + var(--safe-t)); min-width: 112px; }
+  #skill-row { max-width: 55vw; }
+  .auth-box { padding: 24px 18px 20px; }
+}
+
+@media (max-height: 520px) {
+  :root { --edge: 7px; --pad-edge: 8px; --dpad: 38px; --chat-h: 145px; }
+  #control-pad-left, #control-pad-right { bottom: calc(8px + var(--safe-b)); }
+  #minimap-box { top: calc(52px + var(--safe-t)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+/* ===== Pointer Events Fix ===== */
+#control-pad-left,
+#control-pad-right,
+#hud-menu,
+#hud-top-left,
+#minimap-box,
+#chat-container,
+#chat-toggle-floating,
+.modal,
+#auth-screen,
+#death-modal,
+button,
+input,
+select,
+textarea,
+.quick-slot,
+#attack-action-btn {
+  pointer-events: auto !important;
+}
+
+.dpad-btn, .dpad-center, #skill-row button, .skill-btn, .quick-slot, #attack-action-btn, .menu-btn, button {
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent;
+}
+/* ===== Anime Skill Cut-in System ===== */
+#anime-cutin {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.4);
+}
+#anime-cutin.active {
+  display: flex;
+  animation: cutinFlash 0.6s ease-out forwards;
+}
+.cutin-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(83, 219, 255, 0.15), rgba(167, 139, 250, 0.25));
+  clip-path: polygon(0 25%, 100% 10%, 100% 75%, 0 90%);
+  transform: scaleX(0);
+  animation: cutinBgSlide 0.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+}
+.cutin-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transform: translateX(-100vw);
+  animation: cutinContentSlide 0.5s cubic-bezier(0.1, 1, 0.3, 1) forwards;
+}
+#cutin-avatar {
+  font-size: 70px;
+  width: 100px;
+  height: 100px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 3px solid var(--neon);
+  background: rgba(10, 17, 31, 0.9);
+  box-shadow: 0 0 30px var(--neon);
+}
+.cutin-text-box {
+  display: flex;
+  flex-direction: column;
+}
+#cutin-char-name {
+  color: var(--gold);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px #000;
+}
+#cutin-skill-name {
+  margin: 0;
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(24px, 5vw, 42px);
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-shadow: 0 0 20px var(--neon), 0 4px 10px #000;
+  white-space: nowrap;
+}
+
+@keyframes cutinFlash {
+  0% { background: rgba(255, 255, 255, 0.8); }
+  100% { background: rgba(0, 0, 0, 0.5); }
+}
+@keyframes cutinBgSlide {
+  0% { transform: scaleX(0); }
+  50% { transform: scaleX(1.1); }
+  100% { transform: scaleX(1); }
+}
+@keyframes cutinContentSlide {
+  0% { transform: translateX(-100vw) scale(0.8); opacity: 0; }
+  60% { transform: translateX(20px) scale(1.05); opacity: 1; }
+  100% { transform: translateX(0) scale(1); opacity: 1; }
+}
+/* ===== ป้องกันการซูมและการคัดลอกบนมือถือ (Mobile Touch Guard) ===== */
+* {
+  -webkit-touch-callout: none !important; /* ป้องกันเมนูป๊อปอัปเวลาแตะค้าง */
+  -webkit-user-select: none !important;   /* ป้องกันการไฮไลต์/คัดลอกข้อความ */
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important; /* ป้องกันแถบสDไฮไลต์สีฟ้าเวลากดปุ่ม */
+}
+
+/* อนุญาตให้พิมพ์ข้อความในช่องแชทหรือช่องกรอกตามปกติ */
+input, textarea {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+/* ล็อกหน้าจอเกมไม่ให้เลื่อนหรือเด้งเวลาปัดนิ้ว */
+html, body {
+  position: fixed;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  touch-action: none; /* ป้องกันการเลื่อนจออัตโนมัติของเบราว์เซอร์ */
+}
+/* ===== เมนูด้านบน ย่อ/ขยายได้ ===== */
+#hud-menu {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  z-index: 50;
+  transition: all 0.25s ease;
+}
+
+#hud-menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 500px;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.25s ease, transform 0.25s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#hud-menu.collapsed #hud-menu-buttons {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+}
+
+.menu-toggle {
+  background: linear-gradient(135deg, #1a1f2e, #0d111a) !important;
+  border: 1px solid #3a4a6b !important;
+  font-size: 18px !important;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 0 12px rgba(0, 180, 255, 0.25);
+}
+
+.menu-toggle:hover {
+  background: linear-gradient(135deg, #243044, #152033) !important;
+  border-color: #5a7ab8 !important;
+}
+
+/* ===== ปุ่มเลื่อน (D-pad) ทำให้ชัดเจนขึ้น ===== */
+#control-pad-left {
+  position: absolute;
+  bottom: 20px;
+  left: 16px;
+  display: grid;
+  grid-template-columns: 54px 54px 54px;
+  grid-template-rows: 54px 54px 54px;
+  gap: 6px;
+  z-index: 40;
+  opacity: 0.92;
+}
+
+.dpad-btn {
+  width: 54px;
+  height: 54px;
+  background: linear-gradient(145deg, #1e2a3a, #0f1620);
+  border: 2px solid #3d5a80;
+  border-radius: 14px;
+  color: #7ec8ff;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 4px 0 #0a1018,
+    0 0 14px rgba(0, 160, 255, 0.25),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: all 0.12s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dpad-btn:active,
+.dpad-btn.pressed {
+  transform: translateY(3px);
+  box-shadow: 
+    0 1px 0 #0a1018,
+    0 0 8px rgba(0, 200, 255, 0.4),
+    inset 0 2px 6px rgba(0,0,0,0.4);
+  background: linear-gradient(145deg, #2a3a50, #152030);
+  color: #b8e0ff;
+  border-color: #5a90d0;
+}
+
+.dpad-center {
+  width: 54px;
+  height: 54px;
+  background: radial-gradient(circle, #1a2535 30%, #0c121c 100%);
+  border: 2px solid #2a3a50;
+  border-radius: 50%;
+  color: #4a6a8a;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+  opacity: 0.7;
+}
+
+/* บนมือถือให้ใหญ่ขึ้นอีกนิด */
+@media (max-width: 768px) {
+  #control-pad-left {
+    bottom: 16px;
+    left: 10px;
+    grid-template-columns: 60px 60px 60px;
+    grid-template-rows: 60px 60px 60px;
+    gap: 7px;
+  }
+  .dpad-btn, .dpad-center {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
+}
+
+/* ===== ธนาคาร — แสดงตรงกลางจอ ===== */
+#bk-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 16px;
+}
+
+#bk-panel[style*="flex"],
+#bk-panel.open {
+  display: flex !important;
+}
+
+.bk-box {
+  width: min(420px, calc(100vw - 32px));
+  max-height: min(80vh, 640px);
+  overflow: auto;
+  border: 1px solid rgba(83, 219, 255, 0.35);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(17, 27, 46, 0.98), rgba(8, 13, 24, 0.98));
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.65),
+    0 0 30px rgba(83, 219, 255, 0.1);
+  color: #edf5ff;
+}
+
+.bk-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(117, 151, 210, 0.25);
+  font-size: 17px;
+  font-weight: 600;
+  color: #f2fbff;
+}
+
+#bk-gold {
+  margin-left: auto;
+  margin-right: 10px;
+  color: var(--gold, #ffd36a);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.bk-x {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(117, 151, 210, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #c4d1e5;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bk-x:hover {
+  color: #ff5577;
+  border-color: #ff5577;
+  background: rgba(255, 85, 119, 0.1);
+}
+
+#bk-body {
+  padding: 16px 18px 20px;
+}
+
+/* ปรับปุ่ม/input ในธนาคารให้เข้าธีม (ถ้าต้องการ) */
+#bk-body input[type="number"],
+#bk-body .bk-amt {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(117, 151, 210, 0.3);
+  border-radius: 10px;
+  background: rgba(4, 9, 18, 0.75);
+  color: #edf5ff;
+  margin-bottom: 10px;
+}
+
+#bk-body button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(83, 219, 255, 0.4);
+  background: rgba(83, 219, 255, 0.12);
+  color: var(--neon, #53dbff);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#bk-body button:hover {
+  background: rgba(83, 219, 255, 0.22);
+  border-color: var(--neon, #53dbff);
+}
